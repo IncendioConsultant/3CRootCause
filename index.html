@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3C Diagnosis Framework</title>
+<meta name="description" content="Incendio's 3C diagnosis framework: trace each people symptom to its root causes and the 3C aspect they come from.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF;--surface:#F6F7F9;--ink:#24262B;--ink-2:#4A4E57;--ink-3:#5E636D;
+  --cat-bg:#2A2C31;--cat-ink:#FFFFFF;--accent-on-cat:#F27A2B;
+  --area:#D7DDE5;--row:#EEF1F5;--line:#5B6270;--border:#C9CFD8;--tag-border:#B7BEC9;
+  --yellow:#FCD565;--yellow-ink:#3B2A00;--brick:#BF4F17;--brick-ink:#FFFFFF;
+  --control:#878E99;--focus:#1F5FBF;--danger-bg:#FCEBEB;--danger-ink:#7A1F1F;--warn-bg:#FFF4D6;--warn-ink:#5A3D00;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17181B;--surface:#202227;--ink:#ECEDEF;--ink-2:#C4C8CF;--ink-3:#A9AEB7;
+  --cat-bg:#3A3E46;--cat-ink:#FFFFFF;--accent-on-cat:#F79A5A;
+  --area:#2A2E35;--row:#202328;--line:#8D94A0;--border:#3A3E46;--tag-border:#5A606B;
+  --control:#737A86;--focus:#7FB0FF;--danger-bg:#3A1D1D;--danger-ink:#F5C2C2;--warn-bg:#3A2F14;--warn-ink:#F6DFA4;
+}}
+:root[data-theme="dark"]{
+  --bg:#17181B;--surface:#202227;--ink:#ECEDEF;--ink-2:#C4C8CF;--ink-3:#A9AEB7;
+  --cat-bg:#3A3E46;--cat-ink:#FFFFFF;--accent-on-cat:#F79A5A;
+  --area:#2A2E35;--row:#202328;--line:#8D94A0;--border:#3A3E46;--tag-border:#5A606B;
+  --control:#737A86;--focus:#7FB0FF;--danger-bg:#3A1D1D;--danger-ink:#F5C2C2;--warn-bg:#3A2F14;--warn-ink:#F6DFA4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:16px}
+body{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:16px;line-height:1.5}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1680px;margin:0 auto;padding:40px 40px 48px}
+header h1{font-size:clamp(28px,3.4vw,46px);line-height:1.15;font-weight:700;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:8px}
+.intro{margin-top:14px;max-width:900px;color:var(--ink-2);font-size:17px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.btn{font:inherit;font-size:15px;font-weight:500;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:6px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--surface)}
+.btn.primary{background:var(--cat-bg);border-color:var(--cat-bg);color:var(--cat-ink)}
+.btn.primary:hover{opacity:.9}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+
+.nav{margin-top:32px}
+.nav-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:12px}
+.nav-head h2{font-size:20px;font-weight:700}
+.nav-head p{font-size:15px;color:var(--ink-3)}
+.nav-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px 18px}
+.nav-col{border-top:3px solid var(--cat-bg);padding-top:10px}
+.nav-col h3{font-size:16px;font-weight:700;display:flex;gap:8px;align-items:baseline;margin-bottom:8px}
+.nav-col h3 small{font-size:14px;font-weight:400;color:var(--ink-3)}
+.nav-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.nav-btn{font:inherit;width:100%;text-align:left;min-height:44px;padding:8px 12px;border-radius:6px;border:1.5px solid var(--control);background:var(--bg);color:var(--ink);cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center}
+.nav-btn:hover{background:var(--surface)}
+.nav-btn .nb-code{font-size:13px;font-weight:700;color:var(--ink-3)}
+.nav-btn .nb-name{font-size:15px;line-height:1.35}
+.nav-btn .nb-n{font-size:13px;color:var(--ink-3);white-space:nowrap}
+.nav-btn.is-open{border-color:var(--ink);background:var(--surface)}
+.nav-btn.is-open .nb-name{font-weight:700}
+.nav-empty{font-size:14.5px;color:var(--ink-3)}
+
+.toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px;margin:28px 0 8px;padding:14px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.seg{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.seg-label{font-size:15px;color:var(--ink-3);margin-right:4px}
+.seg button{font:inherit;font-size:15px;min-height:44px;padding:0 14px;border-radius:6px;border:1.5px solid var(--control);background:transparent;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--cat-bg);border-color:var(--cat-bg);color:var(--cat-ink);font-weight:500}
+.search{flex:1 1 240px;display:flex;flex-direction:column;gap:4px;max-width:400px}
+.search label{font-size:13px;color:var(--ink-3)}
+.search input{font:inherit;font-size:16px;min-height:44px;padding:0 12px;border-radius:6px;border:1.5px solid var(--control);background:var(--bg);color:var(--ink)}
+.view{display:flex;gap:6px}
+.status{font-size:14px;color:var(--ink-3);min-height:21px;flex-basis:100%}
+
+.notice{border-radius:8px;padding:18px 20px;background:var(--surface);border:1px solid var(--border);margin-bottom:14px}
+.notice.error{background:var(--danger-bg);border-color:transparent;color:var(--danger-ink)}
+.notice.warn{background:var(--warn-bg);border-color:transparent;color:var(--warn-ink)}
+.notice h2,.notice h3,.notice h4{font-size:17px;margin-bottom:4px}
+.notice p+p{margin-top:6px}
+.notice .btn{margin-top:12px;border-color:currentColor;color:inherit}
+.skeleton{display:flex;flex-direction:column;gap:10px}
+.skeleton div{height:56px;border-radius:8px;background:var(--row)}
+
+.pgrp{font-size:19px;font-weight:700;margin:26px 0 10px}
+.pgrp:first-child{margin-top:8px}
+.panel{border:1.5px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--bg)}
+.panel-h{font-size:inherit;font-weight:inherit}
+.panel-toggle{font:inherit;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto 24px;gap:6px 16px;align-items:center;padding:14px 18px;min-height:64px;background:transparent;border:0;border-radius:7px;color:var(--ink);text-align:left;cursor:pointer}
+.panel-toggle:hover{background:var(--surface)}
+.ph-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:4px}
+.tag{display:inline-block;font-size:13px;font-weight:500;background:var(--cat-bg);color:var(--cat-ink);border-radius:4px;padding:2px 8px}
+.ph-code{font-size:13px;font-weight:700;color:var(--ink-3)}
+.ph-name{display:block;font-size:20px;font-weight:700;line-height:1.3}
+.ph-note{display:block;font-size:15px;color:var(--ink-2);margin-top:2px}
+.ph-count{font-size:14.5px;color:var(--ink-3);white-space:nowrap}
+.ph-chev{display:flex;color:var(--ink-2)}
+.panel-toggle[aria-expanded="true"] .ph-chev{transform:rotate(180deg)}
+.panel-body{padding:20px 18px 24px;border-top:1px solid var(--border)}
+
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:32px}
+.layout.no-aside{grid-template-columns:minmax(0,1fr)}
+.p-aside{position:sticky;top:16px;align-self:start}
+.step0{border:2px dashed var(--line);border-radius:8px;padding:16px}
+.step0 .s0h{font-size:16px;font-weight:700;margin-bottom:8px}
+.step0 ol{padding-left:20px;font-size:15px;color:var(--ink-2)}
+.step0 li+li{margin-top:6px}
+.order{margin-top:16px;font-size:14.5px;font-style:italic;color:var(--ink-3)}
+.order:first-child{margin-top:0}
+.grp{display:flex;align-items:baseline;gap:10px;margin:0 0 12px;font-size:18px;font-weight:700}
+.grp small{font-size:15px;font-weight:400;color:var(--ink-3)}
+.grp:not(:first-child){margin-top:28px}
+.cat{display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px;margin-bottom:14px}
+.catbox{background:var(--cat-bg);color:var(--cat-ink);border-radius:6px;padding:20px 18px;display:flex;flex-direction:column;justify-content:center}
+.catbox .ch{font-size:20px;font-weight:700;line-height:1.2;color:var(--accent-on-cat)}
+.catbox p{margin-top:6px;font-size:16px}
+.areas{display:flex;flex-direction:column;gap:10px;min-width:0}
+.area{display:grid;grid-template-columns:210px minmax(0,1fr);gap:10px}
+.areabox{background:var(--area);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
+.areabox .ah{font-size:16.5px;font-weight:700;line-height:1.3}
+.areabox p{margin-top:4px;font-size:14px;color:var(--ink-2)}
+.roots{display:flex;flex-direction:column;gap:4px;min-width:0}
+.root{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;background:var(--row);border-radius:5px;padding:9px 12px}
+.rtext{display:flex;gap:10px;font-size:16px;line-height:1.35}
+.code{font-weight:700;color:var(--ink-3);min-width:42px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-left:52px}
+.c3{font-size:14px;line-height:1.3;border:1.5px solid var(--tag-border);border-radius:5px;padding:5px 8px;background:var(--bg)}
+.c3 b{font-weight:700}
+.arrow{color:var(--line);display:none;justify-content:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:14.5px;font-weight:500;padding:5px 10px;border-radius:5px;line-height:1.2}
+.f{background:var(--yellow);color:var(--yellow-ink)}
+.d{background:var(--brick);color:var(--brick-ink)}
+.final{display:grid;grid-template-columns:minmax(0,1fr) 40px auto 40px auto;align-items:center;gap:0 10px;margin-top:22px}
+.final .arrow{display:flex}
+.finalbox{border:2px dashed var(--line);border-radius:8px;padding:16px 18px;font-size:18px;font-weight:700}
+.finalbox span{font-weight:500;color:var(--ink-3);margin-right:10px}
+.final .chip{font-size:16px;padding:10px 14px}
+
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-size:15px;color:var(--ink-2)}
+.legend{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center}
+.legend i{display:inline-block;width:20px;height:20px;border-radius:4px;vertical-align:-4px;margin-right:8px}
+.legend .c3{margin-right:8px}
+
+@media (min-width:1760px){
+  .root{grid-template-columns:minmax(0,1.25fr) minmax(0,2fr);align-items:center;gap:0 10px}
+  .meta{display:grid;grid-template-columns:minmax(0,.85fr) 40px minmax(0,1.1fr);padding-left:0;align-items:center}
+  .meta .c3{justify-self:start}
+  .meta .arrow{display:flex}
+}
+@media (max-width:1100px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:20px}
+  .p-aside{position:static}
+}
+@media (max-width:820px){
+  .wrap{padding:24px 16px 32px}
+  .cat,.area{grid-template-columns:minmax(0,1fr)}
+  .meta{padding-left:0}
+  .panel-toggle{grid-template-columns:minmax(0,1fr) 24px;padding:14px}
+  .ph-count{grid-column:1;grid-row:2}
+  .ph-chev{grid-column:2;grid-row:1}
+  .panel-body{padding:16px 12px 20px}
+  .final{grid-template-columns:minmax(0,1fr);gap:10px}
+  .final .arrow{display:none}
+  .final .chip{justify-self:start}
+  .view{flex-basis:100%}
+}
+@media (prefers-reduced-motion:no-preference){
+  .btn,.seg button,.nav-btn,.panel-toggle{transition:background-color .15s}
+  .ph-chev{transition:transform .2s}
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title">3C Diagnosis Framework</h1>
+    <p class="intro" id="intro"></p>
+    <div class="actions">
+      <a class="btn primary" id="edit-link" href="#" target="_blank" rel="noopener">Edit Data in Google Sheet</a>
+      <button type="button" class="btn" id="refresh">Refresh Data</button>
+      <button type="button" class="btn" id="theme" aria-pressed="false">Dark Mode</button>
+    </div>
+  </header>
+
+  <nav class="nav" aria-labelledby="nav-title">
+    <div class="nav-head">
+      <h2 id="nav-title">Symptoms</h2>
+      <p>Select a symptom to open it and collapse the others.</p>
+    </div>
+    <div class="nav-cols" id="nav-cols"></div>
+  </nav>
+
+  <div class="toolbar" role="search">
+    <div class="view" role="group" aria-label="Open or collapse symptoms">
+      <button type="button" class="btn" id="expand-all" disabled>Expand All</button>
+      <button type="button" class="btn" id="collapse-all" disabled>Collapse All</button>
+    </div>
+    <div class="seg" role="group" aria-label="Filter root causes by 3C source">
+      <span class="seg-label">Root Cause Source</span>
+      <button type="button" data-src="" aria-pressed="true">All</button>
+      <button type="button" data-src="Clarity" aria-pressed="false">Clarity</button>
+      <button type="button" data-src="Capability" aria-pressed="false">Capability</button>
+      <button type="button" data-src="Culture" aria-pressed="false">Culture</button>
+    </div>
+    <div class="search">
+      <label for="q">Search root causes or interventions</label>
+      <input id="q" type="search" autocomplete="off" placeholder="For example: RACI, onboarding, B6">
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </div>
+
+  <div id="warn"></div>
+  <main id="panels" aria-busy="true"></main>
+
+  <footer>
+    <div class="legend">
+      <span><i style="background:var(--yellow)"></i>System Foundation</span>
+      <span><i style="background:var(--brick)"></i>Development</span>
+      <span><span class="c3"><b>Clarity</b>: Aspect</span>Source of the root cause in the 3C Framework</span>
+    </div>
+    <span id="footer-text"></span>
+  </footer>
+</div>
+<script>
+// Paste the ID of the Google Sheet here (the long code between /d/ and /edit in its link).
+const SHEET_ID = '1_l5AWRKB9P3sp3vR8r141NKgITeh7nfrpdWl-k1qeho';
+const TABS = { symptoms: 'Symptoms', cats: 'Categories', roots: 'Root Causes', text: 'Page Text' };
+const SYM_COLS = ['Symptom Code', '3C', 'Symptom', 'Symptom Note', 'Order Note', 'Final Question', 'Final Development', 'Final Foundation'];
+const CAT_COLS = ['Symptom Code', 'Code', 'Category', 'Guiding Question', 'Group', 'Group Note'];
+const ROOT_COLS = ['Symptom Code', 'Category', 'Area Code', 'Problem Area', 'Area Note', 'Root Code', 'Root Cause', '3C Source', '3C Aspect', 'Foundation Interventions', 'Development Interventions'];
+const C3 = ['Clarity', 'Capability', 'Culture'];
+const TEXT_DEFAULTS = { title: '3C Diagnosis Framework', intro: '', footer: '' };
+const OPEN_KEY = 'pdf-open-symptoms';
+const THEME_KEY = 'pdf-theme';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const split = s => s.split(';').map(x => x.trim()).filter(Boolean);
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ARROW = '<svg width="28" height="12" viewBox="0 0 28 12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M19 1 L26 6 L19 11 Z" fill="currentColor"/></svg>';
+const CHEV = '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M6 8.5 L11 13.5 L16 8.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const state = { data: null, src: '', q: '', open: new Set(), loaded: false };
+
+function readStore(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function writeStore(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } }
+
+let jsonpSeq = 0;
+
+function tableToRows(table) {
+  const head = (table.cols || []).map(c => String(c.label ?? '').trim());
+  const rows = (table.rows || []).map(r => head.map((_, i) => {
+    const c = (r.c || [])[i];
+    if (!c) return '';
+    if (c.f != null) return String(c.f);
+    return c.v == null ? '' : String(c.v);
+  }));
+  return [head, ...rows.filter(r => r.some(x => x.trim() !== ''))];
+}
+
+function toObjects(rows, required, tab) {
+  if (!rows.length) return [];
+  const head = rows[0].map(h => h.trim());
+  const missing = required.filter(c => !head.includes(c));
+  if (missing.length) throw new Error(`The "${tab}" tab is missing the column ${missing.map(m => `"${m}"`).join(', ')}. Check that the header row was not renamed.`);
+  return rows.slice(1).map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? '').trim()])));
+}
+
+const pendingTabs = new Map();
+window.google = window.google || {};
+window.google.visualization = window.google.visualization || {};
+window.google.visualization.Query = window.google.visualization.Query || {};
+window.google.visualization.Query.setResponse = resp => {
+  const done = pendingTabs.get(String(resp && resp.reqId));
+  if (done) done(resp);
+};
+
+function fetchTab(tab) {
+  return new Promise((resolve, reject) => {
+    const id = String(++jsonpSeq);
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('The Google Sheet did not respond. Check that you are online and that link sharing is set to "Anyone with the link: Viewer", then try again.'));
+    }, 20000);
+    function cleanup() { clearTimeout(timer); pendingTabs.delete(id); script.remove(); }
+    pendingTabs.set(id, resp => {
+      cleanup();
+      if (resp.status === 'error') {
+        const detail = (resp.errors || []).map(e => e.detailed_message || e.message).filter(Boolean).join(' ');
+        reject(new Error(`The "${tab}" tab could not be read. ${detail}`.trim()));
+        return;
+      }
+      resolve(tableToRows(resp.table || {}));
+    });
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('The Google Sheet could not be reached. Check that you are online and that link sharing is set to "Anyone with the link: Viewer".'));
+    };
+    script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=reqId:${id}&headers=1&sheet=${encodeURIComponent(tab)}&cb=${Date.now()}`;
+    document.head.appendChild(script);
+  });
+}
+
+async function load() {
+  if (SHEET_ID === 'PASTE_SHEET_ID_HERE') {
+    $('edit-link').hidden = true;
+    showError('This page is not connected to a Google Sheet yet.', 'Open index.html and paste the Sheet ID into SHEET_ID at the top of the script.', false);
+    return;
+  }
+  $('panels').setAttribute('aria-busy', 'true');
+  $('refresh').disabled = true;
+  if (!state.loaded) $('panels').innerHTML = '<div class="skeleton" aria-hidden="true">' + '<div></div>'.repeat(4) + '</div>';
+  $('status').textContent = 'Loading the framework from Google Sheet.';
+  try {
+    const [s, c, r, t] = await Promise.all([fetchTab(TABS.symptoms), fetchTab(TABS.cats), fetchTab(TABS.roots), fetchTab(TABS.text)]);
+    const cats = toObjects(c, CAT_COLS, TABS.cats).filter(x => x.Code);
+    const roots = toObjects(r, ROOT_COLS, TABS.roots).filter(x => x['Root Cause']);
+    const text = { ...TEXT_DEFAULTS };
+    toObjects(t, ['Key', 'Text'], TABS.text).forEach(x => { if (x.Key) text[x.Key] = x.Text; });
+    const seen = new Set(), dups = [], syms = [];
+    toObjects(s, SYM_COLS, TABS.symptoms).filter(x => x['Symptom Code']).forEach(x => {
+      const code = x['Symptom Code'];
+      if (seen.has(code)) { if (!dups.includes(code)) dups.push(code); return; }
+      seen.add(code);
+      x.checks = Object.keys(x).filter(k => /^Step 0 Check \d+$/.test(k) && x[k])
+        .sort((a, b) => +a.split(' ').pop() - +b.split(' ').pop()).map(k => x[k]);
+      x.cats = cats.filter(k => k['Symptom Code'] === code);
+      x.roots = roots.filter(k => k['Symptom Code'] === code);
+      syms.push(x);
+    });
+    const unknown = [...new Set([...cats, ...roots].map(x => x['Symptom Code']).filter(code => !seen.has(code)))];
+    state.data = { syms, text, unknown, dups };
+    setInitialOpen();
+    renderAll();
+    state.loaded = true;
+  } catch (e) {
+    showError('The framework could not be loaded.', e.message, true);
+  } finally {
+    $('refresh').disabled = false;
+    $('panels').setAttribute('aria-busy', 'false');
+  }
+}
+
+function showError(title, detail, retry) {
+  $('panels').innerHTML = `<div class="notice error" role="alert"><h2>${esc(title)}</h2><p>${esc(detail)}</p>${retry ? '<button type="button" class="btn" id="retry">Try Again</button>' : ''}</div>`;
+  $('status').textContent = '';
+  if (retry) $('retry').addEventListener('click', load);
+}
+
+function codes() { return state.data.syms.map(s => s['Symptom Code']); }
+
+function setInitialOpen() {
+  const all = codes();
+  if (state.loaded) { state.open = new Set([...state.open].filter(c => all.includes(c))); return; }
+  const fromHash = decodeURIComponent(location.hash.slice(1));
+  if (fromHash && all.includes(fromHash)) { state.open = new Set([fromHash]); return; }
+  let saved = null;
+  try { saved = JSON.parse(readStore(OPEN_KEY) || 'null'); } catch (e) { saved = null; }
+  if (Array.isArray(saved)) { state.open = new Set(saved.filter(c => all.includes(c))); return; }
+  const first = state.data.syms.find(s => s.roots.length) || state.data.syms[0];
+  state.open = new Set(first ? [first['Symptom Code']] : []);
+}
+
+function groupsOf(syms) {
+  const extra = [...new Set(syms.map(s => s['3C']).filter(g => !C3.includes(g)))];
+  return [...C3, ...extra];
+}
+const groupLabel = g => g || 'Unassigned';
+
+function matches(r) {
+  if (state.src && r['3C Source'] !== state.src) return false;
+  if (!state.q) return true;
+  const hay = [r['Root Code'], r['Root Cause'], r['Problem Area'], r['3C Source'], r['3C Aspect'], r['Foundation Interventions'], r['Development Interventions']].join(' ').toLowerCase();
+  return hay.includes(state.q);
+}
+const isFiltered = () => !!(state.src || state.q);
+
+function countText(sym) {
+  const total = sym.roots.length;
+  if (!total) return 'No root causes yet';
+  if (!isFiltered()) return plural(total, 'root cause');
+  return `${sym.roots.filter(matches).length} of ${plural(total, 'root cause')}`;
+}
+
+function renderAll() {
+  const { syms, text, unknown, dups } = state.data;
+  $('title').textContent = text.title;
+  document.title = text.title;
+  $('intro').textContent = text.intro;
+  $('footer-text').textContent = text.footer;
+
+  const warn = [];
+  if (unknown.length) warn.push(`Some rows use a Symptom Code that is not in the Symptoms tab: ${unknown.map(u => `"${u || '(blank)'}"`).join(', ')}. These rows are hidden until the code is added to Symptoms.`);
+  if (dups.length) warn.push(`These Symptom Codes appear more than once in the Symptoms tab: ${dups.map(u => `"${u}"`).join(', ')}. Only the first row of each is used.`);
+  $('warn').innerHTML = warn.length ? `<div class="notice warn" role="status"><h2>Check the Google Sheet</h2>${warn.map(w => `<p>${esc(w)}</p>`).join('')}</div>` : '';
+
+  const all = syms.flatMap(s => s.roots);
+  const counts = { '': all.length };
+  all.forEach(r => { counts[r['3C Source']] = (counts[r['3C Source']] || 0) + 1; });
+  document.querySelectorAll('.seg button').forEach(b => { b.textContent = `${b.dataset.src || 'All'} (${counts[b.dataset.src] || 0})`; });
+
+  const groups = groupsOf(syms);
+  $('nav-cols').innerHTML = groups.map(g => {
+    const list = syms.filter(s => s['3C'] === g);
+    if (!list.length && !C3.includes(g)) return '';
+    return `<div class="nav-col"><h3>${esc(groupLabel(g))}<small>${plural(list.length, 'symptom')}</small></h3>`
+      + (list.length ? `<ul class="nav-list">${list.map(s => `<li><button type="button" class="nav-btn" data-code="${esc(s['Symptom Code'])}"><span class="nb-code">${esc(s['Symptom Code'])}</span><span class="nb-name">${esc(s.Symptom)}</span><span class="nb-n">${s.roots.length}</span><span class="sr-only nb-state"></span></button></li>`).join('')}</ul>`
+        : '<p class="nav-empty">No symptoms yet. Add one in the Symptoms tab.</p>')
+      + '</div>';
+  }).join('');
+
+  if (!syms.length) {
+    $('panels').innerHTML = '<div class="notice"><h2>No symptoms yet</h2><p>The Symptoms tab has no rows. Add a symptom in the Google Sheet, then press Refresh Data.</p></div>';
+    $('status').textContent = '';
+    return;
+  }
+  let html = '';
+  groups.forEach(g => {
+    const list = syms.filter(s => s['3C'] === g);
+    if (!list.length) return;
+    html += `<h2 class="pgrp">${esc(groupLabel(g))} Symptoms</h2>`;
+    list.forEach(s => {
+      const i = syms.indexOf(s);
+      const open = state.open.has(s['Symptom Code']);
+      html += `<section class="panel" id="panel-${i}" data-code="${esc(s['Symptom Code'])}">`
+        + `<h3 class="panel-h"><button type="button" class="panel-toggle" id="toggle-${i}" aria-expanded="${open}" aria-controls="body-${i}">`
+        + `<span><span class="ph-meta"><span class="tag">${esc(groupLabel(g))} Symptom</span><span class="ph-code">${esc(s['Symptom Code'])}</span></span>`
+        + `<span class="ph-name">${esc(s.Symptom)}</span>${s['Symptom Note'] ? `<span class="ph-note">(${esc(s['Symptom Note'])})</span>` : ''}</span>`
+        + `<span class="ph-count" id="count-${i}"></span><span class="ph-chev">${CHEV}</span></button></h3>`
+        + `<div class="panel-body" id="body-${i}" role="region" aria-labelledby="toggle-${i}"${open ? '' : ' hidden'}></div></section>`;
+    });
+  });
+  $('panels').innerHTML = html;
+  renderBodies();
+  updateNav();
+}
+
+function renderBodies() {
+  const { syms } = state.data;
+  syms.forEach((s, i) => {
+    const body = $('body-' + i);
+    if (!body) return;
+    body.innerHTML = buildBody(s);
+    $('count-' + i).textContent = countText(s);
+  });
+  const total = syms.reduce((n, s) => n + s.roots.length, 0);
+  const shown = syms.reduce((n, s) => n + s.roots.filter(matches).length, 0);
+  $('status').textContent = isFiltered()
+    ? `Showing ${shown} of ${plural(total, 'root cause')} across ${plural(syms.length, 'symptom')}.`
+    : `${plural(total, 'root cause')} across ${plural(syms.length, 'symptom')}.`;
+}
+
+function buildBody(s) {
+  const aside = (s.checks.length ? `<div class="step0"><p class="s0h">${esc(s['Step 0 Title'] || 'Step 0: Before Diagnosing')}</p><ol>${s.checks.map(c => `<li>${esc(c)}</li>`).join('')}</ol></div>` : '')
+    + (s['Order Note'] ? `<p class="order">${esc(s['Order Note'])}</p>` : '');
+  let main;
+  const shown = s.roots.filter(matches);
+  if (!s.roots.length) {
+    main = `<div class="notice"><h4>No root causes yet</h4><p>Add rows with Symptom Code "${esc(s['Symptom Code'])}" in the Categories and Root Causes tabs, then press Refresh Data.</p></div>`;
+  } else if (!shown.length) {
+    main = '<div class="notice"><h4>No root causes in this symptom match</h4><p>Try another word or 3C source.</p><button type="button" class="btn js-clear">Clear Filters</button></div>';
+  } else {
+    main = buildCategories(s, shown);
+  }
+  return `<div class="layout${aside ? '' : ' no-aside'}">${aside ? `<div class="p-aside">${aside}</div>` : ''}<div class="p-main">${main}</div></div>`;
+}
+
+function buildCategories(s, shown) {
+  const catOrder = s.cats.map(c => c.Code);
+  const extra = [...new Set(shown.map(r => r.Category))].filter(c => !catOrder.includes(c));
+  const catInfo = Object.fromEntries(s.cats.map(c => [c.Code, c]));
+  let html = '', lastGroup = null;
+  [...catOrder, ...extra].forEach(code => {
+    const rows = shown.filter(r => r.Category === code);
+    if (!rows.length) return;
+    const c = catInfo[code] || { Category: '', 'Guiding Question': '', Group: '', 'Group Note': '' };
+    if (c.Group && c.Group !== lastGroup) {
+      html += `<h4 class="grp">${esc(c.Group)}${c['Group Note'] ? `<small>${esc(c['Group Note'])}</small>` : ''}</h4>`;
+      lastGroup = c.Group;
+    }
+    const areas = [];
+    rows.forEach(r => {
+      let a = areas.find(x => x.code === r['Area Code']);
+      if (!a) { a = { code: r['Area Code'], name: r['Problem Area'], note: r['Area Note'], rows: [] }; areas.push(a); }
+      a.rows.push(r);
+    });
+    html += `<div class="cat"><div class="catbox"><h5 class="ch">${esc(code)}${c.Category ? ' · ' + esc(c.Category) : ''}</h5>${c['Guiding Question'] ? `<p>${esc(c['Guiding Question'])}</p>` : ''}</div><div class="areas">`;
+    areas.forEach(a => {
+      html += `<div class="area"><div class="areabox"><h6 class="ah">${esc(a.code)} ${esc(a.name)}</h6>${a.note ? `<p>(${esc(a.note)})</p>` : ''}</div><div class="roots">`;
+      a.rows.forEach(r => {
+        const chips = split(r['Foundation Interventions']).map(x => `<span class="chip f">${esc(x)}</span>`)
+          .concat(split(r['Development Interventions']).map(x => `<span class="chip d">${esc(x)}</span>`)).join('');
+        const tag = r['3C Source'] ? `<span class="c3"><b>${esc(r['3C Source'])}</b>${r['3C Aspect'] ? ': ' + esc(r['3C Aspect']) : ''}</span>` : '<span></span>';
+        html += `<div class="root"><div class="rtext"><span class="code">${esc(r['Root Code'])}</span><span>${esc(r['Root Cause'])}</span></div><div class="meta">${tag}<span class="arrow">${ARROW}</span><div class="chips" aria-label="Interventions">${chips}</div></div></div>`;
+      });
+      html += '</div></div>';
+    });
+    html += '</div></div>';
+  });
+  if (!isFiltered() && (s['Final Question'] || s['Final Development'] || s['Final Foundation'])) {
+    html += `<div class="final"><div class="finalbox"><span>Final Step</span>${esc(s['Final Question'])}</div>`
+      + (s['Final Development'] ? `<span class="arrow">${ARROW}</span><span class="chip d">${esc(s['Final Development'])}</span>` : '')
+      + (s['Final Foundation'] ? `<span class="arrow">${ARROW}</span><span class="chip f">${esc(s['Final Foundation'])}</span>` : '') + '</div>';
+  }
+  return html;
+}
+
+function applyOpen() {
+  document.querySelectorAll('.panel').forEach(p => {
+    const open = state.open.has(p.dataset.code);
+    p.querySelector('.panel-toggle').setAttribute('aria-expanded', String(open));
+    p.querySelector('.panel-body').hidden = !open;
+  });
+  updateNav();
+  writeStore(OPEN_KEY, JSON.stringify([...state.open]));
+  const url = location.pathname + location.search;
+  try {
+    if (state.open.size === 1) history.replaceState(null, '', url + '#' + encodeURIComponent([...state.open][0]));
+    else history.replaceState(null, '', url);
+  } catch (e) { /* history unavailable */ }
+}
+
+function updateNav() {
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    const open = state.open.has(b.dataset.code);
+    b.classList.toggle('is-open', open);
+    b.querySelector('.nb-state').textContent = open ? ', open' : '';
+  });
+  const n = state.data ? state.data.syms.length : 0;
+  $('expand-all').disabled = !n || state.open.size === n;
+  $('collapse-all').disabled = !state.open.size;
+}
+
+function toggle(code) {
+  if (state.open.has(code)) state.open.delete(code); else state.open.add(code);
+  applyOpen();
+}
+
+function focusSymptom(code) {
+  state.open = new Set([code]);
+  applyOpen();
+  const panel = [...document.querySelectorAll('.panel')].find(p => p.dataset.code === code);
+  if (!panel) return;
+  panel.scrollIntoView({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' });
+  panel.querySelector('.panel-toggle').focus({ preventScroll: true });
+}
+
+function clearFilters() {
+  state.src = ''; state.q = ''; $('q').value = '';
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.src === '')));
+  renderBodies();
+}
+
+function setTheme(mode) {
+  const dark = mode === 'dark';
+  document.documentElement.setAttribute('data-theme', mode);
+  $('theme').setAttribute('aria-pressed', String(dark));
+  $('theme').textContent = dark ? 'Light Mode' : 'Dark Mode';
+  writeStore(THEME_KEY, mode);
+}
+
+(function init() {
+  setTheme(readStore(THEME_KEY) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  $('theme').addEventListener('click', () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+  $('edit-link').href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
+  $('refresh').addEventListener('click', load);
+  $('expand-all').addEventListener('click', () => { state.open = new Set(codes()); applyOpen(); });
+  $('collapse-all').addEventListener('click', () => { state.open = new Set(); applyOpen(); });
+  $('nav-cols').addEventListener('click', e => { const b = e.target.closest('.nav-btn'); if (b) focusSymptom(b.dataset.code); });
+  $('panels').addEventListener('click', e => {
+    const t = e.target.closest('.panel-toggle');
+    if (t) { toggle(t.closest('.panel').dataset.code); return; }
+    if (e.target.closest('.js-clear')) clearFilters();
+  });
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    state.src = b.dataset.src;
+    document.querySelectorAll('.seg button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+    if (state.data) renderBodies();
+  }));
+  $('q').addEventListener('input', e => { state.q = e.target.value.trim().toLowerCase(); if (state.data) renderBodies(); });
+  window.addEventListener('hashchange', () => {
+    const code = decodeURIComponent(location.hash.slice(1));
+    if (state.data && codes().includes(code) && !(state.open.size === 1 && state.open.has(code))) focusSymptom(code);
+  });
+  load();
+})();
+
+</script>
+</body>
+</html>
