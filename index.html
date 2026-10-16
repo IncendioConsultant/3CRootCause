@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,19 +14,13 @@
   --cat-bg:#2A2C31;--cat-ink:#FFFFFF;--accent-on-cat:#F27A2B;
   --area:#D7DDE5;--row:#EEF1F5;--line:#5B6270;--border:#C9CFD8;--tag-border:#B7BEC9;
   --yellow:#FCD565;--yellow-ink:#3B2A00;--brick:#BF4F17;--brick-ink:#FFFFFF;
-  --control:#878E99;--focus:#1F5FBF;--danger-bg:#FCEBEB;--danger-ink:#7A1F1F;--warn-bg:#FFF4D6;--warn-ink:#5A3D00;
+  --control:#878E99;--head-hover:#34363C;--focus:#1F5FBF;--danger-bg:#FCEBEB;--danger-ink:#7A1F1F;--warn-bg:#FFF4D6;--warn-ink:#5A3D00;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#17181B;--surface:#202227;--ink:#ECEDEF;--ink-2:#C4C8CF;--ink-3:#A9AEB7;
-  --cat-bg:#3A3E46;--cat-ink:#FFFFFF;--accent-on-cat:#F79A5A;
-  --area:#2A2E35;--row:#202328;--line:#8D94A0;--border:#3A3E46;--tag-border:#5A606B;
-  --control:#737A86;--focus:#7FB0FF;--danger-bg:#3A1D1D;--danger-ink:#F5C2C2;--warn-bg:#3A2F14;--warn-ink:#F6DFA4;
-}}
 :root[data-theme="dark"]{
   --bg:#17181B;--surface:#202227;--ink:#ECEDEF;--ink-2:#C4C8CF;--ink-3:#A9AEB7;
   --cat-bg:#3A3E46;--cat-ink:#FFFFFF;--accent-on-cat:#F79A5A;
   --area:#2A2E35;--row:#202328;--line:#8D94A0;--border:#3A3E46;--tag-border:#5A606B;
-  --control:#737A86;--focus:#7FB0FF;--danger-bg:#3A1D1D;--danger-ink:#F5C2C2;--warn-bg:#3A2F14;--warn-ink:#F6DFA4;
+  --control:#737A86;--head-hover:#454952;--focus:#7FB0FF;--danger-bg:#3A1D1D;--danger-ink:#F5C2C2;--warn-bg:#3A2F14;--warn-ink:#F6DFA4;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none!important}
@@ -37,7 +31,7 @@ a{color:inherit}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .wrap{max-width:1680px;margin:0 auto;padding:40px 40px 48px}
 header h1{font-size:clamp(28px,3.4vw,46px);line-height:1.15;font-weight:700;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:8px}
-.intro{margin-top:14px;max-width:900px;color:var(--ink-2);font-size:17px}
+.intro{margin-top:14px;color:var(--ink-2);font-size:17px;text-align:justify;hyphens:auto;text-wrap:pretty}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
 .btn{font:inherit;font-size:15px;font-weight:500;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:6px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;text-decoration:none}
 .btn:hover{background:var(--surface)}
@@ -87,17 +81,21 @@ header h1{font-size:clamp(28px,3.4vw,46px);line-height:1.15;font-weight:700;text
 .pgrp:first-child{margin-top:8px}
 .panel{border:1.5px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--bg)}
 .panel-h{font-size:inherit;font-weight:inherit}
-.panel-toggle{font:inherit;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto 24px;gap:6px 16px;align-items:center;padding:14px 18px;min-height:64px;background:transparent;border:0;border-radius:7px;color:var(--ink);text-align:left;cursor:pointer}
-.panel-toggle:hover{background:var(--surface)}
+.panel-toggle{font:inherit;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto 24px;gap:6px 16px;align-items:center;padding:16px 20px;min-height:72px;background:var(--cat-bg);border:0;border-radius:7px;color:var(--cat-ink);text-align:left;cursor:pointer}
+.panel-toggle[aria-expanded="true"]{border-radius:7px 7px 0 0}
+.panel-toggle:hover{background:var(--head-hover)}
+.panel{border-color:var(--cat-bg)}
+.panel-toggle .tag{background:var(--accent-on-cat);color:#1E1F23}
 .ph-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:4px}
 .tag{display:inline-block;font-size:13px;font-weight:500;background:var(--cat-bg);color:var(--cat-ink);border-radius:4px;padding:2px 8px}
-.ph-code{font-size:13px;font-weight:700;color:var(--ink-3)}
-.ph-name{display:block;font-size:20px;font-weight:700;line-height:1.3}
-.ph-note{display:block;font-size:15px;color:var(--ink-2);margin-top:2px}
-.ph-count{font-size:14.5px;color:var(--ink-3);white-space:nowrap}
-.ph-chev{display:flex;color:var(--ink-2)}
+.ph-code{font-size:13px;font-weight:700;color:#C4C8CF}
+.ph-name{display:block;font-size:23px;font-weight:700;line-height:1.3}
+.ph-name.empty{font-weight:500;font-style:italic;color:#C4C8CF}
+.ph-note{display:block;font-size:15px;color:#D7DBE0;margin-top:2px}
+.ph-count{font-size:14.5px;color:#C4C8CF;white-space:nowrap}
+.ph-chev{display:flex;color:#FFFFFF}
 .panel-toggle[aria-expanded="true"] .ph-chev{transform:rotate(180deg)}
-.panel-body{padding:20px 18px 24px;border-top:1px solid var(--border)}
+.panel-body{padding:20px 18px 24px}
 
 .layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:32px}
 .layout.no-aside{grid-template-columns:minmax(0,1fr)}
@@ -158,6 +156,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:cen
   .cat,.area{grid-template-columns:minmax(0,1fr)}
   .meta{padding-left:0}
   .panel-toggle{grid-template-columns:minmax(0,1fr) 24px;padding:14px}
+  .ph-name{font-size:20px}
   .ph-count{grid-column:1;grid-row:2}
   .ph-chev{grid-column:2;grid-row:1}
   .panel-body{padding:16px 12px 20px}
@@ -234,7 +233,7 @@ const ROOT_COLS = ['Symptom Code', 'Category', 'Area Code', 'Problem Area', 'Are
 const C3 = ['Clarity', 'Capability', 'Culture'];
 const TEXT_DEFAULTS = { title: '3C Diagnosis Framework', intro: '', footer: '' };
 const OPEN_KEY = 'pdf-open-symptoms';
-const THEME_KEY = 'pdf-theme';
+const THEME_KEY = 'pdf-theme-choice';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -409,7 +408,7 @@ function renderAll() {
     const list = syms.filter(s => s['3C'] === g);
     if (!list.length && !C3.includes(g)) return '';
     return `<div class="nav-col"><h3>${esc(groupLabel(g))}<small>${plural(list.length, 'symptom')}</small></h3>`
-      + (list.length ? `<ul class="nav-list">${list.map(s => `<li><button type="button" class="nav-btn" data-code="${esc(s['Symptom Code'])}"><span class="nb-code">${esc(s['Symptom Code'])}</span><span class="nb-name">${esc(s.Symptom)}</span><span class="nb-n">${s.roots.length}</span><span class="sr-only nb-state"></span></button></li>`).join('')}</ul>`
+      + (list.length ? `<ul class="nav-list">${list.map(s => `<li><button type="button" class="nav-btn" data-code="${esc(s['Symptom Code'])}"><span class="nb-code">${esc(s['Symptom Code'])}</span><span class="nb-name">${esc(s.Symptom || 'No symptom name yet')}</span><span class="nb-n">${s.roots.length}</span><span class="sr-only nb-state"></span></button></li>`).join('')}</ul>`
         : '<p class="nav-empty">No symptoms yet. Add one in the Symptoms tab.</p>')
       + '</div>';
   }).join('');
@@ -430,7 +429,7 @@ function renderAll() {
       html += `<section class="panel" id="panel-${i}" data-code="${esc(s['Symptom Code'])}">`
         + `<h3 class="panel-h"><button type="button" class="panel-toggle" id="toggle-${i}" aria-expanded="${open}" aria-controls="body-${i}">`
         + `<span><span class="ph-meta"><span class="tag">${esc(groupLabel(g))} Symptom</span><span class="ph-code">${esc(s['Symptom Code'])}</span></span>`
-        + `<span class="ph-name">${esc(s.Symptom)}</span>${s['Symptom Note'] ? `<span class="ph-note">(${esc(s['Symptom Note'])})</span>` : ''}</span>`
+        + (s.Symptom ? `<span class="ph-name">${esc(s.Symptom)}</span>` : '<span class="ph-name empty">No symptom name yet</span>') + `${s['Symptom Note'] ? `<span class="ph-note">(${esc(s['Symptom Note'])})</span>` : ''}</span>`
         + `<span class="ph-count" id="count-${i}"></span><span class="ph-chev">${CHEV}</span></button></h3>`
         + `<div class="panel-body" id="body-${i}" role="region" aria-labelledby="toggle-${i}"${open ? '' : ' hidden'}></div></section>`;
     });
@@ -561,12 +560,15 @@ function setTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
   $('theme').setAttribute('aria-pressed', String(dark));
   $('theme').textContent = dark ? 'Light Mode' : 'Dark Mode';
-  writeStore(THEME_KEY, mode);
 }
 
 (function init() {
-  setTheme(readStore(THEME_KEY) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-  $('theme').addEventListener('click', () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+  setTheme(readStore(THEME_KEY) === 'dark' ? 'dark' : 'light');
+  $('theme').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    writeStore(THEME_KEY, next);
+  });
   $('edit-link').href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
   $('refresh').addEventListener('click', load);
   $('expand-all').addEventListener('click', () => { state.open = new Set(codes()); applyOpen(); });
